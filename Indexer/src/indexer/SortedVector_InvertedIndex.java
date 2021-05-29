@@ -1,15 +1,21 @@
 package indexer;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import indexer.Indexer;
+import indexer.Indexer.TFdata;
 import indexer.Indexer.indexData;
+import indexer.SortedVector_IDFandTF.nameThr;
 import javafx.util.Pair;
 
 
 
-public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<indexData>>> {
+public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<indexData>>> implements Serializable {
 	
 	public class SortbyKeyString implements Comparator<Pair<String, Vector<indexData>>> {
 
@@ -23,6 +29,75 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
     private final SortbyKeyString comparator = new SortbyKeyString();
       
     public SortedVector_InvertedIndex() {}
+    
+    public SortedVector_InvertedIndex(String str) {
+    	
+    	ArrayList<String> mainArr = Stream.of((str).split("\n"))
+	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    	
+    	for(int i=0; i<mainArr.size(); ++i) {
+    		ArrayList<String> row = Stream.of((mainArr.get(i)).split("/"))
+    	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    		
+    		Vector<indexData> iDatas = new Vector<indexData>();
+     		for(int j=0; j<row.size()-1; ++j) {
+    			ArrayList<String> idss = Stream.of((row.get(j+1)).split(","))
+        	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    			iDatas.add(new indexData(Integer.parseInt(idss.get(0)), idss.get(1),
+    					Integer.parseInt(idss.get(2)),Integer.parseInt(idss.get(3))));
+    		}
+    		addingRow(row.get(0), iDatas);
+    	}
+    }
+    
+    private static String toStr;
+
+    class nameThr implements Runnable{
+    	
+    	private Pair<String, Vector<indexData>> row;
+    	
+    	public nameThr (Pair<String, Vector<indexData>> row) {
+    		this.row = row;
+    	}
+
+    	public void run() {
+    		String tempStr; 
+    		tempStr = row.getKey() + "/";
+    		for(int j=0; j<row.getValue().size(); ++j) {
+    			tempStr += row.getValue().get(j) + "/";
+    		}
+    		tempStr = tempStr.substring(0, tempStr.length() - 1);
+    		tempStr += "\n";
+    		
+    		synchronized(toStr) {
+    			toStr += tempStr;
+    		}    		
+    	}
+    }
+
+    
+    @Override
+    public String toString() {
+    	
+    	ArrayList<Thread> threads = new ArrayList<Thread>();
+    	toStr = "";
+    	int s = this.size();
+    	
+    	for(int i=0; i<s; ++i) {
+    		Thread t = new Thread(new nameThr(this.get(i)));
+    		t.start();
+    		threads.add(t);
+    	}
+    	
+    	for(Thread t : threads) {
+        	try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        } 
+        return toStr;
+    }
   
     // method for adding elements in data
     // member of 'SortedVector'
@@ -71,6 +146,32 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
 	  
 	        addingElementsInSortedVector();
     	}
+    }
+    
+    public void addingRow(String key, Vector<indexData> iDatas)
+    {
+
+        list.add(new Pair<String, Vector<indexData>>(key, iDatas));
+  
+        if (list.size() > 1) {
+   
+            try {
+  
+                list.sort(comparator);
+            }
+            catch (Exception e) {
+  
+            	Pair<String, Vector<indexData>> recent = list.lastElement();
+                list.removeElementAt(list.size() - 1);
+                Pair<String, Vector<indexData>> val;
+  
+            	val = recent;
+            	list.add(val);
+            	list.sort(comparator);
+            }
+        }
+  
+        addingElementsInSortedVector();
     }
   
     // adding element in object of 'SortedVector'
@@ -146,7 +247,8 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
     }
     
     public void printMe() {
-    	for(int i=0; i<Main.wordsNum; ++i) {
+    	int s = this.size();
+    	for(int i=0; i<s; ++i) {
             
         	System.out.print(this.get(i).getKey() + ":- ");
         	for(int j=0; j<this.get(i).getValue().size(); ++j) {

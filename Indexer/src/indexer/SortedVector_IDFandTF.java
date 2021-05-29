@@ -1,15 +1,19 @@
 package indexer;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import indexer.Indexer.TFdata;
-import indexer.Indexer.indexData;
 import javafx.util.Pair;
 
 
 
-public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vector<TFdata>>> {
+public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vector<TFdata>>> implements Serializable {
+	
 	
 	public class SortbyKeyString implements Comparator<Pair<Pair<String,Double>, Vector<TFdata>>> {
 
@@ -23,9 +27,74 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     private final SortbyKeyString comparator = new SortbyKeyString();
       
     public SortedVector_IDFandTF() {}
-  
-    // method for adding elements in data
-    // member of 'SortedVector'
+    
+    public SortedVector_IDFandTF(String str) {
+    	ArrayList<String> mainArr = Stream.of((str).split("\n"))
+	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    	for(int i=0; i<mainArr.size(); ++i) {
+    		ArrayList<String> row = Stream.of((mainArr.get(i)).split("/"))
+    	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    		Vector<TFdata> TFs = new Vector<TFdata>();
+    		for(int j=0; j<row.size()-2; ++j) {
+    			ArrayList<String> tf = Stream.of((row.get(j+2)).split(","))
+        	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    			TFs.add(new TFdata(Integer.parseInt(tf.get(0)), Double.parseDouble(tf.get(1))));
+    		}
+    		addingRow(new Pair<String,Double>(row.get(0), Double.parseDouble(row.get(1))), TFs);
+    	}
+    }
+    
+    private static String toStr;
+
+    class nameThr implements Runnable{
+    	
+    	private Pair<Pair<String,Double>, Vector<TFdata>> row;
+    	
+    	public nameThr (Pair<Pair<String,Double>, Vector<TFdata>> row) {
+    		this.row = row;
+    	}
+
+    	public void run() {
+    		String tempStr; 
+			tempStr = row.getKey().getKey() + "/" + row.getKey().getValue() + "/";
+    		
+			int s = row.getValue().size();
+    		for(int j=0; j<s ; ++j) {
+    			tempStr += row.getValue().get(j) + "/";
+    		}
+    		tempStr = tempStr.substring(0, tempStr.length() - 1);
+    		tempStr += "\n";
+    		
+    		synchronized(toStr) {
+    			toStr += tempStr;
+    		}    		
+    	}
+
+    }
+    
+    @Override
+    public String toString() {
+    	ArrayList<Thread> threads = new ArrayList<Thread>();
+    	toStr = "";
+    	
+    	int s = this.size();
+    	for(int i=0; i<s; ++i) {
+    		Thread t = new Thread(new nameThr(this.get(i)));
+    		t.start();
+    		threads.add(t);
+    	}
+    	
+    	for(Thread t : threads) {
+        	try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        } 
+    	
+        return toStr;
+    }
+    
     
     public void incElementDF(String key) {
     	
@@ -99,18 +168,40 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
 	        addingElementsInSortedVector();
     	}
     }
+    
+    public void addingRow(Pair<String,Double> key, Vector<TFdata> tfDatas)
+    {
+
+        list.add(new Pair<Pair<String,Double>, Vector<TFdata>>(key, tfDatas));
   
-    // adding element in object of 'SortedVector'
+        if (list.size() > 1) {
+   
+            try {
   
+                list.sort(comparator);
+            }
+            catch (Exception e) {
+  
+            	Pair<Pair<String,Double>, Vector<TFdata>> recent = list.lastElement();
+                list.removeElementAt(list.size() - 1);
+                Pair<Pair<String,Double>, Vector<TFdata>> val;
+  
+            	val = recent;
+            	list.add(val);
+            	list.sort(comparator);
+            }
+        }
+  
+        addingElementsInSortedVector();
+    }
+  
+    
     private void addingElementsInSortedVector()
     {
-  
         // clear all values of "SortedVector's" object
-  
         clear();
   
         // adding values in object of 'SortedVector'
-  
         addAll(list);
     }
     

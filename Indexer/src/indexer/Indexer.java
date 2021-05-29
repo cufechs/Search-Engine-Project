@@ -1,6 +1,7 @@
 package indexer;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,12 +21,24 @@ public class Indexer implements Runnable{
         public String stringType;
         public int indexOfType, indexInString;
         
+        indexData(int docIndex, String stringType, int indexOfType ,int indexInString){
+        	this.docIndex = docIndex;
+        	this.stringType = stringType;
+        	this.indexOfType = indexOfType;
+        	this.indexInString = indexInString;
+        }
+        
         public String getData() {
         	return ("{" + docIndex + ", " + stringType + ", " + indexOfType + ", " + indexInString + "}");
         }
+        
+        @Override
+        public String toString() {
+        	return  docIndex + "," + stringType + "," + indexOfType + "," + indexInString ;
+        }
     }
     
-    public static class TFdata {
+    public static class TFdata implements Serializable{
         public int docIndex;
         public double TF;
         
@@ -36,6 +49,11 @@ public class Indexer implements Runnable{
         
         public String getData() {
         	return ("{" + docIndex + ", " + TF + "}");
+        }
+        
+        @Override
+        public String toString() {
+        	return  docIndex + "," + TF;
         }
     }
 	
@@ -52,11 +70,7 @@ public class Indexer implements Runnable{
 	
 	Indexer(int docIndex, String StrType, int StrTypeIndex, ArrayList<String> str){
 		
-		indData = new indexData();
-		indData.docIndex = docIndex;
-		indData.stringType = StrType;
-		indData.indexOfType = StrTypeIndex;
-
+		indData = new indexData(docIndex, StrType, StrTypeIndex, 0);
 		this.str = str;
 	}
 	
