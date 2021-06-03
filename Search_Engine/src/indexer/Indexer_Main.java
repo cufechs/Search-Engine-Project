@@ -25,7 +25,7 @@ import indexer.Indexer.TFdata;
 import indexer.Indexer.indexData;
 import indexer.SortedVector_IDFandTF.nameThr;
 
-public class Main {
+public class Indexer_Main {
 
 	static int failedURLS = 0;
 	static int[] docSize;
@@ -38,11 +38,6 @@ public class Main {
 
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		Indexer.init();
-		
-		
-		//String tst = "Hi I am Adham going to carfully say somethings adham";
-		//ArrayList<String> tstNew = Indexer.removeStopwordsAndStem(tst);
-		//System.out.println(tst);
 		
 		StringBuilder contentBuilder = new StringBuilder();
 		try {
@@ -123,7 +118,6 @@ public class Main {
         wordsNum = Indexer.invertedIndex.size();
         
         
-        //Indexer.invertedIndex.printMe();
         
         System.out.println("\nTime taken for building the invertedIndex: " + time + " mSec.");
         System.out.println("\nNumber of failed urls: " + failedURLS + ", From: "+ URL.size());        
@@ -131,14 +125,14 @@ public class Main {
         
         time = (long) System.currentTimeMillis();
         for(int j=0; j<wordsNum; ++j) {
-    		for(int i=0; i<Main.docNum; ++i) {
+    		for(int i=0; i<Indexer_Main.docNum; ++i) {
     		
 	    		String word = Indexer.invertedIndex.get(j).getKey();
 	    		
 	    		Pair<String,Integer> pr = new Pair<String,Integer>(word, i);
 	    		
 				if (Indexer.map.containsKey(pr)) {
-					Indexer.TF_IDFmatrix.addingElement(word ,new TFdata(i,(double)Indexer.map.get(pr)/Main.docSize[i]));
+					Indexer.TF_IDFmatrix.addingElement(word ,new TFdata(i,(double)Indexer.map.get(pr)/Indexer_Main.docSize[i]));
 					Indexer.TF_IDFmatrix.incElementDF(word);
 				}
     		}
@@ -155,9 +149,7 @@ public class Main {
 		/////////// Serializing TF_IDF Index ///////////
 		////////////////////////////////////////////////
         time = (long) System.currentTimeMillis();
-             
-		//SortedVector_IDFandTF mat = new SortedVector_IDFandTF(Indexer.TF_IDFmatrix.toStringList());
-		
+             		
 	    BufferedWriter writer = new BufferedWriter(new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\IDF_TF.txt")));
 		writer.write(Indexer.TF_IDFmatrix.toString());
         writer.close();
@@ -169,15 +161,12 @@ public class Main {
 		////////////////////////////////////////////////
 			
 				
-			
-			
+
 		//////////////////////////////////////////////////
 		/////////// Serializing inverted Index ///////////
 		//////////////////////////////////////////////////
 			
 		time = (long) System.currentTimeMillis();
-
-		//SortedVector_InvertedIndex mat1 = new SortedVector_InvertedIndex(Indexer.invertedIndex.toStringList());
 		
 		writer = new BufferedWriter(new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\InvertedIndex.txt")));
 		writer.write(Indexer.invertedIndex.toString());  
@@ -189,16 +178,18 @@ public class Main {
 		System.out.println("\nTime taken to serialize invertedIndex matrix: " + time + " mSec., Words count: " + lines.length );
 		//////////////////////////////////////////////////
 
-		//Indexer.invertedIndex.printMe();
-		//SortedVector_InvertedIndex mat = new SortedVector_InvertedIndex(
+		
+		//SortedVector_InvertedIndex mat1 = new SortedVector_InvertedIndex(
 		//		Files.readString(Paths.get((String)(System.getProperty("user.dir") + "\\inventory\\invertedIndex.txt")))
 		//		);
-		//mat.printMe();
+		
+		//SortedVector_IDFandTF mat2 = new SortedVector_IDFandTF(
+		//		Files.readString(Paths.get((String)(System.getProperty("user.dir") + "\\inventory\\IDF_TF.txt")))
+		//		);
 	    
 	    
 	    
 	}
-	
 	
 
 }
@@ -222,7 +213,7 @@ class DocIndexer implements Runnable{
 		doc = Jsoup.connect(url).timeout(100000).get(); 
     	} catch (IOException e) {
             System.out.println("io - "+e + ",	at " + docIndex);
-            ++Main.failedURLS;
+            ++Indexer_Main.failedURLS;
             return;
         }
     	
@@ -233,7 +224,7 @@ class DocIndexer implements Runnable{
 			ArrayList<String> str = Indexer.removeStopwordsAndStem(title);
 			threads.add(new Thread(new Indexer(docIndex, "title", 0, str)));
 			threads.get(threads.size()-1).start();
-			Main.docSize[docIndex] += str.size();
+			Indexer_Main.docSize[docIndex] += str.size();
 		}
 		
 		int j;
@@ -249,7 +240,7 @@ class DocIndexer implements Runnable{
     			threads.add(new Thread(r));
     			threads.get(threads.size()-1).start();
     			++j;
-    			Main.docSize[docIndex] += str.size();
+    			Indexer_Main.docSize[docIndex] += str.size();
     		}
 		}
 		
@@ -262,7 +253,7 @@ class DocIndexer implements Runnable{
 			threads.add(new Thread(r));
 			threads.get(threads.size()-1).start();
 			++j;
-			Main.docSize[docIndex] += str.size();
+			Indexer_Main.docSize[docIndex] += str.size();
 		}
 		
 		for(Thread t : threads) {
@@ -275,51 +266,4 @@ class DocIndexer implements Runnable{
 	}
 
 }
-
-class nameThr_IDFandTF implements Runnable{
-
-	private Pair<Pair<String,Double>, Vector<TFdata>> row;
-	
-	public nameThr_IDFandTF (Pair<Pair<String,Double>, Vector<TFdata>> row) {
-		this.row = row;
-	}
-
-	public void run() {
-		String tempStr; 
-		tempStr = row.getKey().getKey() + "/" + row.getKey().getValue() + "/";
-		
-		int s = row.getValue().size();
-		for(int j=0; j<s ; ++j) {
-			tempStr += row.getValue().get(j) + "/";
-		}
-		tempStr = tempStr.substring(0, tempStr.length() - 1);
-		tempStr += "\n";
-		
-		synchronized(Main.content) {
-			Main.content += tempStr;
-		}    		
-	}
-}
-
-class nameThr_InvertedIndex implements Runnable{
-	
-	private Pair<String, Vector<indexData>> row;
-	
-	public nameThr_InvertedIndex (Pair<String, Vector<indexData>> row) {
-		this.row = row;
-	}
-
-	public void run() {
-		String tempStr; 
-		tempStr = row.getKey() + "/";
-		for(int j=0; j<row.getValue().size(); ++j) {
-			tempStr += row.getValue().get(j) + "/";
-		}
-		tempStr = tempStr.substring(0, tempStr.length() - 1);
-		tempStr += "\n";
-		
-		synchronized(Main.content) {
-			Main.content += tempStr;
-		}    		
-	}
-}
+ 

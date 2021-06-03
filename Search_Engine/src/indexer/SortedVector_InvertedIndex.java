@@ -32,6 +32,25 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
       
     public SortedVector_InvertedIndex() {}
     
+    public SortedVector_InvertedIndex(String str) {
+    	ArrayList<String> mainArr = Stream.of((str).split("\n"))
+	            .collect(Collectors.toCollection(ArrayList<String>::new));
+
+    	for(int i=0; i<mainArr.size(); ++i) {
+    		ArrayList<String> row = Stream.of((mainArr.get(i)).split("/"))
+    				.collect(Collectors.toCollection(ArrayList<String>::new));
+
+    		Vector<indexData> iDatas = new Vector<indexData>();
+    		for(int j=0; j<row.size()-1; ++j) {
+    			ArrayList<String> idss = Stream.of((row.get(j+1)).split(","))
+        	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    			iDatas.add(new indexData(Integer.parseInt(idss.get(0)), idss.get(1),
+    					Integer.parseInt(idss.get(2)),Integer.parseInt(idss.get(3))));
+    		}
+    		addingRow(row.get(0), iDatas);
+    	}
+    }
+    
     public SortedVector_InvertedIndex(List<String> str) {
     	
     	for(int i=0; i<str.size(); ++i) {

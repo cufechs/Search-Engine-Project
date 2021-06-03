@@ -141,7 +141,7 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     	for(int i=0; i<list.size(); ++i) {
     	this.set(i, new Pair<Pair<String,Double>, Vector<TFdata>>(
 				new Pair<String,Double>(list.get(i).getKey().getKey(),
-						(Double)Math.log10((double)Main.docNum/list.get(i).getValue().size()))
+						(Double)Math.log10((double)Indexer_Main.docNum/list.get(i).getValue().size()))
 				, list.get(i).getValue()));
     	
     	//System.out.println("log(" + Main.docNum + " / " + list.get(i).getValue().size() + ") = " + list.get(i).getKey().getValue());//+ Math.log10((double)Main.docNum/list.get(i).getValue().size()));
@@ -279,8 +279,6 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
             }
         }
   
-        // Edge case for strings like
-        // String 1="Geeks" and String 2="Geeksforgeeks"
         if (l1 != l2) {
             return l1 - l2;
         }
@@ -293,7 +291,7 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     }
     
     public void printMe() {
-    	for(int i=0; i<Main.wordsNum; ++i) {
+    	for(int i=0; i<Indexer_Main.wordsNum; ++i) {
             
         	System.out.print(this.get(i).getKey().getKey() + ":- ");
         	System.out.print("DF: (" + (double)this.get(i).getKey().getValue() + ") :- ");
