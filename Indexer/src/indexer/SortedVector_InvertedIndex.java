@@ -2,7 +2,9 @@ package indexer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,13 +32,10 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
       
     public SortedVector_InvertedIndex() {}
     
-    public SortedVector_InvertedIndex(String str) {
+    public SortedVector_InvertedIndex(List<String> str) {
     	
-    	ArrayList<String> mainArr = Stream.of((str).split("\n"))
-	            .collect(Collectors.toCollection(ArrayList<String>::new));
-    	
-    	for(int i=0; i<mainArr.size(); ++i) {
-    		ArrayList<String> row = Stream.of((mainArr.get(i)).split("/"))
+    	for(int i=0; i<str.size(); ++i) {
+    		ArrayList<String> row = Stream.of((str.get(i)).split("/"))
     	            .collect(Collectors.toCollection(ArrayList<String>::new));
     		
     		Vector<indexData> iDatas = new Vector<indexData>();
@@ -50,7 +49,7 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
     	}
     }
     
-    private static String toStr;
+    private static List<String> strList = Collections.synchronizedList(new ArrayList<String>());
 
     class nameThr implements Runnable{
     	
@@ -69,9 +68,8 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
     		tempStr = tempStr.substring(0, tempStr.length() - 1);
     		tempStr += "\n";
     		
-    		synchronized(toStr) {
-    			toStr += tempStr;
-    		}    		
+    		strList.add(tempStr);
+    				
     	}
     }
 
@@ -79,10 +77,21 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
     @Override
     public String toString() {
     	
-    	ArrayList<Thread> threads = new ArrayList<Thread>();
-    	toStr = "";
-    	int s = this.size();
+    	if(this.size() != strList.size())
+    		toStringList();
     	
+    	StringBuilder ser = new StringBuilder();
+    	for (int i=0; i<strList.size(); ++i)
+    		ser.append(strList.get(i));
+    	
+        return ser.toString();
+    }
+    
+    public List<String> toStringList() {
+    	ArrayList<Thread> threads = new ArrayList<Thread>();
+    	strList.clear();
+    	
+    	int s = this.size();
     	for(int i=0; i<s; ++i) {
     		Thread t = new Thread(new nameThr(this.get(i)));
     		t.start();
@@ -95,9 +104,14 @@ public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<index
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-        } 
-        return toStr;
+        }
+    	
+    	//System.out.println("RESULT: " + (strList.size() == this.size()));
+    	
+        return strList;
     }
+    
+    
   
     // method for adding elements in data
     // member of 'SortedVector'

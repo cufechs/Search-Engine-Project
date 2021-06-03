@@ -2,7 +2,9 @@ package indexer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,7 +46,22 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     	}
     }
     
-    private static String toStr;
+    public SortedVector_IDFandTF(List<String> str) {
+    	for(int i=0; i<str.size(); ++i) {
+    		ArrayList<String> row = Stream.of((str.get(i)).split("/"))
+    	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    		Vector<TFdata> TFs = new Vector<TFdata>();
+    		for(int j=0; j<row.size()-2; ++j) {
+    			ArrayList<String> tf = Stream.of((row.get(j+2)).split(","))
+        	            .collect(Collectors.toCollection(ArrayList<String>::new));
+    			TFs.add(new TFdata(Integer.parseInt(tf.get(0)), Double.parseDouble(tf.get(1))));
+    		}
+    		addingRow(new Pair<String,Double>(row.get(0), Double.parseDouble(row.get(1))), TFs);
+    	}
+    }
+    
+    private static List<String> strList = Collections.synchronizedList(new ArrayList<String>());
+    
 
     class nameThr implements Runnable{
     	
@@ -65,17 +82,27 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     		tempStr = tempStr.substring(0, tempStr.length() - 1);
     		tempStr += "\n";
     		
-    		synchronized(toStr) {
-    			toStr += tempStr;
-    		}    		
+    		strList.add(tempStr);		
     	}
 
     }
     
     @Override
     public String toString() {
+    	
+    	if(this.size() != strList.size()) 
+    		toStringList();
+    	
+    	StringBuilder ser = new StringBuilder();
+    	for (int i=0; i<strList.size(); ++i)
+    		ser.append(strList.get(i));
+    	
+        return ser.toString();
+    }
+    
+    public List<String> toStringList() {
     	ArrayList<Thread> threads = new ArrayList<Thread>();
-    	toStr = "";
+    	strList.clear();
     	
     	int s = this.size();
     	for(int i=0; i<s; ++i) {
@@ -90,9 +117,11 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-        } 
+        }
     	
-        return toStr;
+    	//System.out.println("RESULT: " + (strList.size() == this.size()));
+    	
+        return strList;
     }
     
     

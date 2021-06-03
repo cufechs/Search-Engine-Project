@@ -126,9 +126,8 @@ public class Main {
         //Indexer.invertedIndex.printMe();
         
         System.out.println("\nTime taken for building the invertedIndex: " + time + " mSec.");
-        System.out.println("\nNumber of failed urls: " + failedURLS);        
+        System.out.println("\nNumber of failed urls: " + failedURLS + ", From: "+ URL.size());        
 
-        
         
         time = (long) System.currentTimeMillis();
         for(int j=0; j<wordsNum; ++j) {
@@ -156,65 +155,17 @@ public class Main {
 		/////////// Serializing TF_IDF Index ///////////
 		////////////////////////////////////////////////
         time = (long) System.currentTimeMillis();
-        
-	    BufferedWriter writer = null;
-	      
-        content = Indexer.TF_IDFmatrix.toString();
-        
-        //String fileCont = Files.readString(Paths.get((String)(System.getProperty("user.dir") + "\\inventory\\IDF_TF.txt")));
-
-        //To make sure the serialization is correct
-		ArrayList<String> ars = (ArrayList<String>) Stream.of((content).split("\n"))
-	            .collect(Collectors.toCollection(ArrayList<String>::new)); 
-		int size = ars.size();
+             
+		//SortedVector_IDFandTF mat = new SortedVector_IDFandTF(Indexer.TF_IDFmatrix.toStringList());
 		
-		int s1 = Indexer.TF_IDFmatrix.size();
-		ArrayList<Thread> threads1 = new ArrayList<Thread>();
-		
-
-		SortedVector_IDFandTF mat = null;
-		while(size != s1) {
-			mat = new SortedVector_IDFandTF(content);
-			
-			for(int i=0; i<s1; ++i) {
-				try {
-					if(!Indexer.TF_IDFmatrix.get(i).getKey().getKey().equals(mat.get(i).getKey().getKey())) {
-						
-						mat.addingRow(Indexer.TF_IDFmatrix.get(i).getKey(), Indexer.TF_IDFmatrix.get(i).getValue());
-						
-						Thread t = new Thread(new nameThr_IDFandTF(Indexer.TF_IDFmatrix.get(i)));
-			    		t.start();
-			    		threads1.add(t);
-
-					}
-				}
-				catch(ArrayIndexOutOfBoundsException e) {
-					mat.addingRow(Indexer.TF_IDFmatrix.get(i).getKey(), Indexer.TF_IDFmatrix.get(i).getValue());
-					Thread t = new Thread(new nameThr_IDFandTF(Indexer.TF_IDFmatrix.get(i)));
-		    		t.start();
-		    		threads1.add(t);    	
-				}
-			}
-			
-			for(Thread t : threads1) {
-	        	try {
-					t.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-	        } 
-			threads1.clear();
-			ars = (ArrayList<String>) Stream.of((content).split("\n"))
-					.collect(Collectors.toCollection(ArrayList<String>::new)); 
-			size = ars.size(); 
-		}
-		writer = new BufferedWriter(new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\IDF_TF.txt")));
-		writer.write(content);
+	    BufferedWriter writer = new BufferedWriter(new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\IDF_TF.txt")));
+		writer.write(Indexer.TF_IDFmatrix.toString());
         writer.close();
 
-		    
 		time = (long) System.currentTimeMillis() - time;
-		System.out.println("\nTime taken to serialize TF_IDF matrix: " + time + " mSec., Words count: " + mat.size() );
+		
+		String[] lines = Indexer.invertedIndex.toString().split("\r\n|\r|\n");
+		System.out.println("\nTime taken to serialize TF_IDF matrix: " + time + " mSec., Words count: " + lines.length );
 		////////////////////////////////////////////////
 			
 				
@@ -225,58 +176,17 @@ public class Main {
 		//////////////////////////////////////////////////
 			
 		time = (long) System.currentTimeMillis();
-		content = Indexer.invertedIndex.toString();
 
-		//To make sure the serialization is correct
-	 	ars = (ArrayList<String>) Stream.of((content).split("\n"))
-				.collect(Collectors.toCollection(ArrayList<String>::new)); 
-		size = ars.size();  
-
-		s1 = Indexer.invertedIndex.size();
-		SortedVector_InvertedIndex mat1 = null;
-
-		while(size != s1) {
-			mat1 = new SortedVector_InvertedIndex(content);
-			
-			
-			for(int i=0; i<s1; ++i) {
-				try {
-									
-					if(!Indexer.invertedIndex.get(i).getKey().equals(mat1.get(i).getKey())) {
-						mat1.addingRow(Indexer.invertedIndex.get(i).getKey(), Indexer.invertedIndex.get(i).getValue());	
-						
-						Thread t = new Thread(new nameThr_InvertedIndex(Indexer.invertedIndex.get(i)));
-			    		t.start();
-			    		threads1.add(t);
-	
-					}
-				}catch(ArrayIndexOutOfBoundsException e) {
-					mat1.addingRow(Indexer.invertedIndex.get(i).getKey(), Indexer.invertedIndex.get(i).getValue());	
-					Thread t = new Thread(new nameThr_InvertedIndex(Indexer.invertedIndex.get(i)));
-		    		t.start();
-		    		threads1.add(t);
-				}
-			}
-			
-			for(Thread t : threads1) {
-	        	try {
-					t.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-	        } 
-			
-			ars = (ArrayList<String>) Stream.of((content).split("\n"))
-					.collect(Collectors.toCollection(ArrayList<String>::new)); 
-			size = ars.size(); 
-		}
-
+		//SortedVector_InvertedIndex mat1 = new SortedVector_InvertedIndex(Indexer.invertedIndex.toStringList());
+		
 		writer = new BufferedWriter(new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\InvertedIndex.txt")));
-		writer.write(content);  
+		writer.write(Indexer.invertedIndex.toString());  
 		writer.close();
 
 		time = (long) System.currentTimeMillis() - time;
-		System.out.println("\nTime taken to serialize invertedIndex matrix: " + time + " mSec., Words count: " + mat1.size() );
+		
+		lines = Indexer.invertedIndex.toString().split("\r\n|\r|\n");
+		System.out.println("\nTime taken to serialize invertedIndex matrix: " + time + " mSec., Words count: " + lines.length );
 		//////////////////////////////////////////////////
 
 		//Indexer.invertedIndex.printMe();
