@@ -110,9 +110,7 @@ public class Indexer implements Runnable{
 	public void run() {
 		
 		for(int i=0; i<str.size(); ++i) {
-			
-			indData.indexInString = i;
-			
+	
 			Pair<String,Integer> pr = new Pair<String,Integer>(str.get(i), indData.docIndex);
 			if (map.containsKey(pr))
 				map.put(pr,map.get(pr) + 1);
@@ -121,7 +119,9 @@ public class Indexer implements Runnable{
 			
 			
 			synchronized(invertedIndex) {
-				invertedIndex.addingElement(str.get(i), indData);
+				invertedIndex.addingElement(
+						str.get(i), new indexData(indData.docIndex,indData.stringType, indData.indexOfType, i)
+						);
 			}	
 		}
 	}
