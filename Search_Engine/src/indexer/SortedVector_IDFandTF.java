@@ -291,6 +291,23 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
         }
     }
     
+    public void sortTFs() {
+    	
+    	int size = this.size();
+    	
+    	for(int i=0; i<size; ++i)
+    		this.get(i).getValue().sort(new SortbyTFs());
+
+    }
+    public class SortbyTFs implements Comparator<TFdata> {
+
+	    public int compare(TFdata a, TFdata b)
+	    {
+	        return Double.compare(b.TF, a.TF);
+	    }
+	}
+    
+    
     public void printMe() {
     	for(int i=0; i<Indexer_Main.wordsNum; ++i) {
             
@@ -304,4 +321,3 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
         }
     }
 }
-

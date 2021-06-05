@@ -155,7 +155,8 @@ public class Indexer_Main {
 			}
         } 
         threads.clear();
-         
+        
+        Indexer.TF_IDFmatrix.sortTFs();
          
     	time = (long) System.currentTimeMillis() - time;
         
