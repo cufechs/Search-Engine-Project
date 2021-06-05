@@ -85,23 +85,9 @@ public class Indexer_Main {
         wordsNum = Indexer.invertedIndex.size();  
         
         time = (long) System.currentTimeMillis();
-        /*for(int j=0; j<wordsNum; ++j) {
-    		for(int i=0; i<Indexer_Main.docNum; ++i) {
-    		
-	    		String word = Indexer.invertedIndex.get(j).getKey();
-	    		
-	    		Pair<String,Integer> pr = new Pair<String,Integer>(word, i);
-	    		
-				if (Indexer.map.containsKey(pr)) {
-					Indexer.TF_IDFmatrix.addingElement(word ,new TFdata(i,(double)Indexer.map.get(pr)/Indexer_Main.docSize[i]));
-					Indexer.TF_IDFmatrix.incElementDF(word);
-				}
-    		}
-        }*/
         
         
 		for(int i=0; i<Indexer_Main.docNum; ++i) {
-			
 			threads.add(new Thread(new DocTF_IDF(i)));
 			threads.get(threads.size()-1).start();
 			if(threads.size() >= 1000) {
@@ -177,9 +163,7 @@ public class Indexer_Main {
 		//		);
 	    
 		//Indexer.invertedIndex.printMe();
-		
-		
-		
+
 	}
 
 }
