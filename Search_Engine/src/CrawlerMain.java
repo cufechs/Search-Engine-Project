@@ -25,7 +25,8 @@ public class CrawlerMain implements Runnable {
 				String URL = "";
 				synchronized(URLQueue)
 				{
-					URL = URLQueue.remove();
+					if(URLQueue.size() > 0)
+						URL = URLQueue.remove();
 				}
 				
 				try {

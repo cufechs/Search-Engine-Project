@@ -59,8 +59,8 @@ public class Indexer implements Runnable{
     }
 	
     public static java.util.List<String> stopWords;
-	public static SortedVector_InvertedIndex invertedIndex = new SortedVector_InvertedIndex();
-	public static SortedVector_IDFandTF TF_IDFmatrix = new SortedVector_IDFandTF();
+	public static SortedVector_InvertedIndex invertedIndex;
+	public static SortedVector_IDFandTF TF_IDFmatrix;
 	public static HashMap<Pair<String,Integer>, Integer> map = new HashMap<>();
 	
 
@@ -75,7 +75,7 @@ public class Indexer implements Runnable{
 		this.str = str;
 	}
 	
-	public static void init() {
+	public static void init1() {
 		String path = (String)(System.getProperty("user.dir") + "\\inventory\\english_stopwords.txt");
 		try {
 			stopWords = (java.util.List<String>) Files.readAllLines(Paths.get(path));
@@ -83,6 +83,11 @@ public class Indexer implements Runnable{
 		catch(IOException IOe){
 			System.out.println("error reading " + path);
 		}
+	}
+	
+	public static void init2() {
+		 invertedIndex = new SortedVector_InvertedIndex();
+		 TF_IDFmatrix = new SortedVector_IDFandTF();
 	}
 	
 	public static ArrayList<String> removeStopwordsAndStem(String doc) {
