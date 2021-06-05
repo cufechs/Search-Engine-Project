@@ -9,14 +9,12 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import indexer.Indexer;
-import indexer.Indexer.TFdata;
 import indexer.Indexer.indexData;
-import indexer.SortedVector_IDFandTF.nameThr;
 import javafx.util.Pair;
 
 
 
+@SuppressWarnings("serial")
 public class SortedVector_InvertedIndex extends Vector<Pair<String, Vector<indexData>>> implements Serializable {
 	
 	public class SortbyKeyString implements Comparator<Pair<String, Vector<indexData>>> {

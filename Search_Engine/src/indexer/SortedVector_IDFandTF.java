@@ -14,6 +14,7 @@ import javafx.util.Pair;
 
 
 
+@SuppressWarnings("serial")
 public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vector<TFdata>>> implements Serializable {
 	
 	

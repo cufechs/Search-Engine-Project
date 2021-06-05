@@ -38,7 +38,8 @@ public class Indexer implements Runnable{
         }
     }
     
-    public static class TFdata implements Serializable{
+    @SuppressWarnings("serial")
+	public static class TFdata implements Serializable{
         public int docIndex;
         public double TF;
         
@@ -112,10 +113,13 @@ public class Indexer implements Runnable{
 		for(int i=0; i<str.size(); ++i) {
 	
 			Pair<String,Integer> pr = new Pair<String,Integer>(str.get(i), indData.docIndex);
-			if (map.containsKey(pr))
-				map.put(pr,map.get(pr) + 1);
-			else
-				map.put(pr,1);
+			
+			synchronized(map) {
+				if (map.containsKey(pr))
+					map.put(pr,map.get(pr) + 1);
+				else
+					map.put(pr,1);
+			}
 			
 			
 			synchronized(invertedIndex) {

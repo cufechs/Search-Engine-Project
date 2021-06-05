@@ -1,7 +1,5 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -16,10 +14,11 @@ public class CrawlerMain implements Runnable {
 	static FileWriter SerializedData;
 	
 	static int Counter = 0;
+	final static int crawlsCount = 5000;
 
 	private void Crawl()
 	{	
-		while(Counter < 5000)
+		while(Counter < crawlsCount)
 		{
 			if(URLQueue.size() != 0)
 			{
@@ -35,7 +34,7 @@ public class CrawlerMain implements Runnable {
 ;
 					synchronized(SerializedData)
 					{
-						if(Counter >= 5000)
+						if(Counter >= crawlsCount)
 							return;
 						
 						SerializedData.write(URL + " AdhamNoice ");
@@ -84,17 +83,20 @@ public class CrawlerMain implements Runnable {
 		return sb.toString();
 	}
 	
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws InterruptedException, IOException
 	{			
 		
-		URLQueue = new ArrayBlockingQueue<>(5000);
+		URLQueue = new ArrayBlockingQueue<>(crawlsCount);
 		
-        URLQueue.add("https://en.wikipedia.org/wiki/Keleri");
+        URLQueue.add("https://www.deepcrawl.com/blog/releases/log-file-integration/");
+        URLQueue.add("https://washingtonpress.com/");
+        URLQueue.add("https://proxycrawl.com/how-to-scrape-reddit");
+        URLQueue.add("https://www.quora.com/What-are-some-interesting-sites-to-web-crawl");
+
 
         Thread[] THREADS = new Thread[25];
         
-		SerializedData = new FileWriter("/C:/APT/Project/CrawledData.json");
+        SerializedData = new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\CrawledData.json"));
 
         for(int i=0; i<25; i++)
         {
@@ -117,7 +119,6 @@ public class CrawlerMain implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		Crawl();
 	}
 }
