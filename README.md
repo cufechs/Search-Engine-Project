@@ -12,11 +12,11 @@ The aim of this project is to develop a simple Crawler- based search engine that
 
     - Must have node installed..
     - Go to 'cors' folder
-    - do ```bash npm install cors-anywhere ```
-    - run ```bash node cors ``` - now it's running on localhost:8000
+    - do " npm install cors-anywhere "
+    - run " node cors " - now it's running on localhost:8000
 
 ## 3. Run Interface (Flutter Project):
 
     - Must have flutter and dart installed..
     - Go to 'Interface' folder
-    - run ```bash flutter run --no-sound-null-safety -d chrome --web-port=5555 ``` - now it's running on localhost:5555
+    - run " flutter run --no-sound-null-safety -d chrome --web-port=5555 " - now it's running on localhost:5555
