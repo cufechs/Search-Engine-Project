@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,31 +18,39 @@ import org.jsoup.select.Elements;
 
 public class CrawlerMain implements Runnable {
 	
-	static BlockingQueue<String> URLQueue;
+	final static int crawlsCount = 5000;
+	final static int threadsCountCap = 500;
+	
+	final static HashSet<String> RemovedURLs = new HashSet<String>();
+	final static BlockingQueue<String> URLQueue = new ArrayBlockingQueue<String>(crawlsCount);
 	static FileWriter SerializedData;
 	static HashMap<String, ArrayList<String>> RobotContainer = new HashMap<String, ArrayList<String>>();
 	
 	static int Counter = 0;
 	static AtomicInteger DisallowedURLs = new AtomicInteger();
-
+	
+	
+	
 	private void Crawl()
 	{	
-		while(Counter < 5000)
+		while(Counter < crawlsCount)
 		{
 			String URL = "";
 			synchronized(URLQueue)
 			{
-				while(URLQueue.size() == 0)
-				{}
+				if(URLQueue.size() == 0)
+					continue;
 				
 				URL = URLQueue.remove();
+				
+				if(!RemovedURLs.add(URL))
+                    continue;
 			}
 			
 			try {
 				if(HandleRobot(URL))
 					return;
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				//e.printStackTrace();
 			}
 			
@@ -51,13 +60,13 @@ public class CrawlerMain implements Runnable {
 
 				synchronized(SerializedData)
 				{
-					if(Counter >= 5000)
+					if(Counter >= crawlsCount)
 						return;
 					
 					SerializedData.write(URL + " AdhamNoice ");
 					SerializedData.write(shrinkDoc(document).replace("\n", "").replace("\r", "").replace(System.getProperty("line.separator"), "").replace("\r\n", "") + "\n");
 					
-					System.out.println(((Counter++)/5000.0f)*100 + "%");
+					System.out.println(((++Counter)/(float)crawlsCount)*100 + "%");
 				}
 	
 		        //3. Parse the HTML to extract links to other URLs
@@ -68,10 +77,10 @@ public class CrawlerMain implements Runnable {
 		        {
 		        	synchronized(URLQueue)
 		        	{
-		        		if(URLQueue.contains(page.attr("abs:href")))
-		        			continue;
+		        		String str = page.attr("abs:href");
+			        	if(!URLQueue.contains(str))
+			        		URLQueue.add(str);
 		        	}
-	        		URLQueue.add(page.attr("abs:href"));
 		        }
 			}
 			catch(Exception e)
@@ -101,7 +110,6 @@ public class CrawlerMain implements Runnable {
 		return sb.toString();
 	}
 	
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws InterruptedException, IOException
 	{	
 		/*
@@ -117,7 +125,8 @@ public class CrawlerMain implements Runnable {
 		});
 		*/
 		
-		URLQueue = new ArrayBlockingQueue<>(5000);
+		long time = (long) System.currentTimeMillis();
+
 		
         URLQueue.add("https://stackoverflow.com/");					//Programming
 		URLQueue.add("https://www.theverge.com/tech"); 				//Tech
@@ -130,11 +139,11 @@ public class CrawlerMain implements Runnable {
         URLQueue.add("https://www.amazon.com/");					//Online Shopping
         URLQueue.add("https://www.pcgamer.com/news/");				//Gaming
         
-        Thread[] THREADS = new Thread[50];
+        Thread[] THREADS = new Thread[threadsCountCap];
         
-		SerializedData = new FileWriter("/C:/APT/Project/CrawledData.json");
+        SerializedData = new FileWriter((String)(System.getProperty("user.dir") + "\\inventory\\CrawledData.json"));
 
-        for(int i=0; i<50; i++)
+        for(int i=0; i<threadsCountCap; i++)
         {
         	while(URLQueue.size() == 0)
         	{}
@@ -144,17 +153,19 @@ public class CrawlerMain implements Runnable {
         	THREADS[i].start();
         }
         
-        for(int i=0; i<50; i++)
+        for(int i=0; i<threadsCountCap; i++)
         	THREADS[i].join();
                 
         SerializedData.close();
 		
         SerializedData = null;
+        
+        time = (long) System.currentTimeMillis() - time;
+        System.out.println("\nTime taken for the whole proccess: " + time/1000 + " Seconds");
     }
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		Crawl();
 	}
 	
