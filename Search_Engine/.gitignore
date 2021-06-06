@@ -55,10 +55,7 @@ local.properties
 .scala_dependencies
 .worksheet
 
-/inventory/IDF_TF.txt
-/inventory/InvertedIndex.txt
 /inventory/CrawledData.json
-/inventory/indexedDocs.txt
 
 # Uncomment this line if you wish to ignore the project description file.
 # Typically, this file would be tracked if it contains build/dependency configurations:

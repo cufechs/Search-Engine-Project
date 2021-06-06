@@ -105,9 +105,9 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     	ArrayList<Thread> threads = new ArrayList<Thread>();
     	strList.clear();
     	
-    	int s = this.size();
+    	int s = list.size();
     	for(int i=0; i<s; ++i) {
-    		Thread t = new Thread(new nameThr(this.get(i)));
+    		Thread t = new Thread(new nameThr(list.get(i)));
     		t.start();
     		threads.add(t);
     	}
@@ -139,11 +139,14 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     
     public void calcTheIDF() {
     	
+    	int docCount = Indexer_Main.docNum + Indexer_Main.numberOfPastDocs;
+    	
     	for(int i=0; i<list.size(); ++i) {
-    	this.set(i, new Pair<Pair<String,Double>, Vector<TFdata>>(
-				new Pair<String,Double>(list.get(i).getKey().getKey(),
-						(Double)Math.log10((double)Indexer_Main.docNum/list.get(i).getValue().size()))
-				, list.get(i).getValue()));
+    		list.set(i, new Pair<Pair<String,Double>, Vector<TFdata>>(
+				new Pair<String,Double>(
+						list.get(i).getKey().getKey()
+						,(Double)Math.log10((double)docCount/list.get(i).getValue().size()))
+				,list.get(i).getValue()));
     	
     	//System.out.println("log(" + Main.docNum + " / " + list.get(i).getValue().size() + ") = " + list.get(i).getKey().getValue());//+ Math.log10((double)Main.docNum/list.get(i).getValue().size()));
 
@@ -264,7 +267,7 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
         return -1;
     }
     
-    private static int stringCompare(String str1, String str2)
+    public static int stringCompare(String str1, String str2)
     {
   
         int l1 = str1.length();
@@ -293,10 +296,10 @@ public class SortedVector_IDFandTF extends Vector<Pair<Pair<String,Double>, Vect
     
     public void sortTFs() {
     	
-    	int size = this.size();
+    	int size = list.size();
     	
     	for(int i=0; i<size; ++i)
-    		this.get(i).getValue().sort(new SortbyTFs());
+    		list.get(i).getValue().sort(new SortbyTFs());
 
     }
     public class SortbyTFs implements Comparator<TFdata> {

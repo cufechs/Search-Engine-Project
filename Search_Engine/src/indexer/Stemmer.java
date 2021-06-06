@@ -1,5 +1,12 @@
 package indexer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Stemmer, implementing the Porter Stemming Algorithm
  * <p>
@@ -471,5 +478,30 @@ class Stemmer {
         }
         i_end = k + 1;
         i = 0;
+    }
+    
+    public static void main(String[] args) throws IOException {
+    	
+    	//Stemming test
+    		
+		Stemmer s = new Stemmer();
+		
+		String doc = "local";	//String (word) to stem
+		
+		ArrayList<String> allWords = 
+			      Stream.of((doc.toLowerCase()).replaceAll("[^a-zA-Z0-9]", " ").split(" "))
+			            .collect(Collectors.toCollection(ArrayList<String>::new));
+
+
+	    for(int i=0; i<allWords.size(); ++i) {
+	    	for(int j=0; j<allWords.get(i).length(); ++j)
+	    		s.add(allWords.get(i).charAt(j));
+	    	
+	    	s.stem();
+	    	
+	    	allWords.set(i, s.toString());
+	    }
+		
+		System.out.println(allWords.get(0));
     }
 }
