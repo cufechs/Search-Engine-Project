@@ -6,7 +6,12 @@ The aim of this project is to develop a simple Crawler- based search engine that
 
 ## 1. Run the Query Processor Server:
 
-    {Details on how to run tomcat w kda}
+- Must have java and tomcat installed..
+- Go to 'Search_Engine/src' folder
+- Compile the "QueryProcessor" java class
+- Get .class file and put it in classes folder of WEB-INF of tomcat server;
+- Also add the web.xml file there too (from src folder)
+- And then run the tomcat server by running at cmd in bin folder ```startup.bat```
 
 ## 2. Run cors protection:
 
