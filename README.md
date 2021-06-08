@@ -8,9 +8,9 @@ The aim of this project is to develop a simple Crawler- based search engine that
 
 - Must have java and tomcat installed..
 - Go to 'Search_Engine/src' folder
-- Compile the "QueryProcessor" java class
+- Compile the "QueryProcessor" java class  OR use the "SearchServer" class (from api/classes folder)-> dummy api
 - Get .class file and put it in classes folder of WEB-INF of tomcat server;
-- Also add the web.xml file there too (from src folder)
+- Also add the web.xml file there too (from api folder)
 - And then run the tomcat server by running at cmd in bin folder ```startup.bat```
 
 ## 2. Run cors protection:
